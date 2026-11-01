@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Меню — Альбомный формат (Обновленный макет)</title>
+    <!-- Шрифты Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
+    <!-- html2canvas для экспорта в PNG -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root { --bg-color:#fdfcf9; --text-color:#241e19; --accent-color:#b38234; --border-color:#ded6cb; --dots-color:#c5bcb1; --panel-bg:#fff; --panel-text:#333; }
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { font-family:'Montserrat',sans-serif; background-color:#eae5dc; color:var(--text-color); display:flex; min-height:100vh; }
+        .control-panel { width:380px; min-width:380px; background-color:var(--panel-bg); color:var(--panel-text); border-right:1px solid #d5cec5; padding:22px; display:flex; flex-direction:column; gap:14px; overflow-y:auto; height:100vh; box-shadow:4px 0 15px rgba(0,0,0,.06); z-index:100; }
+        .control-panel h2 { font-family:'Playfair Display',serif; font-size:22px; border-bottom:2px solid var(--accent-color); padding-bottom:8px; margin-bottom:2px; color:#1a1613; }
+        .form-group { display:flex; flex-direction:column; gap:4px; }
+        .form-group label { font-size:11px; font-weight:700; color:#666; text-transform:uppercase; letter-spacing:.5px; }
+        .select-row { display:flex; gap:6px; }
+        .form-control { padding:9px 12px; border:1px solid #ccc; border-radius:4px; font-family:inherit; font-size:13px; background-color:#fafafa; flex-grow:1; }
+        .form-control:focus { outline:none; border-color:var(--accent-color); }
+        .btn { background-color:var(--accent-color); color:#fff; border:none; padding:9px 14px; font-size:12px; font-weight:700; border-radius:4px; cursor:pointer; text-transform:uppercase; transition:.2s; white-space:nowrap; }
+        .btn:hover { background-color:#9c6e26; }
+        .btn-save-png { background-color:#27ae60; margin-top:10px; padding:13px; font-size:13px; letter-spacing:.5px; }
+        .btn-save-png:hover { background-color:#219150; }
+        .manager-category { font-size:11px; font-weight:800; margin-top:10px; color:var(--accent-color); text-transform:uppercase; border-bottom:1px solid #eee; padding-bottom:2px; }
+        .manager-item { display:flex; justify-content:space-between; align-items:center; background:#f7f4ee; padding:6px 10px; margin-bottom:4px; border-radius:4px; font-size:12px; border-left:3px solid var(--accent-color); }
+        .btn-del { background:none; border:none; color:#c0392b; cursor:pointer; font-weight:bold; font-size:16px; padding:0 4px; }
+        .btn-del:hover { color:#e74c3c; }
+        .preview-container { flex-grow:1; display:flex; justify-content:center; align-items:flex-start; background-color:#dcd7ce; padding:30px; overflow:auto; height:100vh; }
+        .menu-page { width:1250px; min-height:850px; background-color:var(--bg-color); padding:45px 50px 35px; box-shadow:0 10px 35px rgba(0,0,0,.12); position:relative; box-sizing:border-box; display:flex; flex-direction:column; justify-content:space-between; }
+        .menu-border { position:absolute; top:16px; bottom:16px; left:16px; right:16px; border:1.5px solid var(--border-color); pointer-events:none; }
+        .menu-border-inner { position:absolute; top:23px; bottom:23px; left:23px; right:23px; border:2px solid var(--accent-color); pointer-events:none; }
+        .menu-header { text-align:center; margin-bottom:20px; }
+        .menu-title { font-family:'Playfair Display',serif; font-size:40px; font-weight:800; text-transform:uppercase; letter-spacing:5px; color:var(--text-color); line-height:1.1; }
+        .menu-subtitle { font-size:12px; letter-spacing:7px; color:var(--accent-color); text-transform:uppercase; margin-top:4px; font-weight:700; }
+        .menu-grid { display:grid; grid-template-columns:1.35fr 1.35fr 1fr; gap:40px; flex-grow:1; align-content:start; }
+        .menu-column { display:flex; flex-direction:column; }
+        .menu-column-center { display:flex; flex-direction:column; justify-content:center; height:100%; }
+        .section-block { margin-bottom:24px; }
+        .section-title { font-family:'Playfair Display',serif; font-size:20px; font-weight:700; text-align:center; margin-bottom:12px; color:var(--accent-color); text-transform:uppercase; border-bottom:1.5px solid var(--border-color); padding-bottom:4px; letter-spacing:1px; position:relative; }
+        .section-title::after { content:''; position:absolute; bottom:-2.5px; left:25%; width:50%; height:2.5px; background-color:var(--accent-color); }
+        .menu-items-list { display:flex; flex-direction:column; gap:8px; }
+        .menu-item { display:flex; flex-direction:column; }
+        .item-row { display:flex; justify-content:space-between; align-items:baseline; }
+        .item-name { font-weight:600; font-size:13.5px; text-transform:uppercase; letter-spacing:.3px; color:var(--text-color); line-height:1.2; }
+        .item-dots { flex-grow:1; border-bottom:1px dotted var(--dots-color); margin:0 8px; opacity:.8; }
+        .item-price { font-weight:800; font-size:14px; color:#9c6e26; white-space:nowrap; }
+        .menu-footer { text-align:center; font-size:11.5px; color:#888; text-transform:uppercase; letter-spacing:3px; border-top:1px solid var(--border-color); padding-top:12px; margin-top:15px; font-weight:600; }
+        @media print { body{background:#fff!important}.control-panel{display:none!important}.preview-container{padding:0!important;background:none!important;height:auto!important;overflow:visible!important}.menu-page{box-shadow:none!important;width:100%!important;min-height:100vh!important}@page{size:landscape;margin:8mm} }
+    </style>
+</head>
+<body>
+    <div class="control-panel">
+        <h2>Редактор Меню</h2>
+        <div class="form-group"><label>Первые блюда</label><div class="select-row"><select id="sel-first" class="form-control"><option value="" disabled selected>Выберите первое блюдо...</option></select><button class="btn" onclick="addFromSelect('first')">+</button></div></div>
+        <div class="form-group"><label>Вторые блюда</label><div class="select-row"><select id="sel-second" class="form-control"><option value="" disabled selected>Выберите второе блюдо...</option></select><button class="btn" onclick="addFromSelect('second')">+</button></div></div>
+        <div class="form-group"><label>Салаты</label><div class="select-row"><select id="sel-salad" class="form-control"><option value="" disabled selected>Выберите салат...</option></select><button class="btn" onclick="addFromSelect('salad')">+</button></div></div>
+        <!-- Гарниры: только выбор из списка, как для остальных блюд -->
+        <div class="form-group"><label>Гарниры</label><div class="select-row"><select id="sel-side" class="form-control"><option value="" disabled selected>Выберите гарнир...</option></select><button class="btn" onclick="addFromSelect('side')">+</button></div></div>
+        <div id="manager-lists" style="flex-grow:1; overflow-y:auto; max-height:30vh; padding-right:2px;"></div>
+        <button class="btn btn-save-png" onclick="saveAsPNG()">Скачать меню (PNG)</button>
+        <button class="btn" style="background-color:#555;" onclick="window.print()">Печать / PDF</button>
+    </div>
+    <div class="preview-container">
+        <div class="menu-page" id="menu-el">
+            <div class="menu-border"></div><div class="menu-border-inner"></div>
+            <div class="menu-header"><div class="menu-title">МЕНЮ НА СЕГОДНЯ</div><div class="menu-subtitle">Домашняя кухня • Всегда свежее</div></div>
+            <div class="menu-grid">
+                <div class="menu-column">
+                    <div class="section-block"><h2 class="section-title">Первые блюда</h2><div class="menu-items-list" id="out-first"></div></div>
+                    <div class="section-block" style="margin-bottom:0;"><h2 class="section-title">Вторые блюда</h2><div class="menu-items-list" id="out-second"></div></div>
+                </div>
+                <div class="menu-column">
+                    <div class="section-block"><h2 class="section-title">Гарниры</h2><div class="menu-items-list" id="out-side"></div></div>
+                    <div class="section-block" style="margin-bottom:0;"><h2 class="section-title">Салаты</h2><div class="menu-items-list" id="out-salad"></div></div>
+                </div>
+                <div class="menu-column-center"><div class="section-block" style="margin-bottom:0;"><h2 class="section-title">Напитки</h2><div class="menu-items-list">
+                    <div class="menu-item"><div class="item-row"><span class="item-name">Компот</span><span class="item-dots"></span><span class="item-price">30 ₽</span></div></div>
+                    <div class="menu-item"><div class="item-row"><span class="item-name">Каркаде</span><span class="item-dots"></span><span class="item-price">30 ₽</span></div></div>
+                    <div class="menu-item"><div class="item-row"><span class="item-name">Сокосодержащий</span><span class="item-dots"></span><span class="item-price">30 ₽</span></div></div>
+                    <div class="menu-item"><div class="item-row"><span class="item-name">Чай</span><span class="item-dots"></span><span class="item-price">40 ₽</span></div></div>
+                    <div class="menu-item"><div class="item-row"><span class="item-name">Кофе растворимый</span><span class="item-dots"></span><span class="item-price">40 ₽</span></div></div>
+                    <div class="menu-item"><div class="item-row"><span class="item-name">Американо</span><span class="item-dots"></span><span class="item-price">70 ₽</span></div></div>
+                    <div class="menu-item"><div class="item-row"><span class="item-name">Эспрессо</span><span class="item-dots"></span><span class="item-price">60 ₽</span></div></div>
+                    <div class="menu-item"><div class="item-row"><span class="item-name">Капучино</span><span class="item-dots"></span><span class="item-price">120 ₽</span></div></div>
+                    <div class="menu-item"><div class="item-row"><span class="item-name">Латте</span><span class="item-dots"></span><span class="item-price">130 ₽</span></div></div>
+                </div></div></div>
+            </div>
+            <div class="menu-footer">Желаем приятного аппетита! • Все цены указаны в рублях</div>
+        </div>
+    </div>
+<script>
+const DATABASE = {
+    first: [
+        {name:"Борщ",price:"80 ₽"},{name:"Свекольник",price:"90 ₽"},{name:"Солянка",price:"120 ₽"},{name:"Суп гороховый",price:"80 ₽"},{name:"Суп грибной",price:"130 ₽"},{name:"Суп рассольник",price:"70 ₽"},{name:"Суп-лапша куриный",price:"60 ₽"},{name:"Уха",price:"70 ₽"},{name:"Харчо",price:"90 ₽"},{name:"Щи",price:"80 ₽"}
+    ],
+    second: [
+        {name:"Голубец",price:"550 ₽/кг"},
+        {name:"Гуляш",price:"90 ₽"},
+        {name:"Зраза карт. с мясом",price:"120 ₽"},
+        {name:"Зраза мясная с грибами",price:"160 ₽"},
+        {name:"Котлета домашняя",price:"100 ₽"},
+        {name:"Кур. филе запеченое",price:"130 ₽"},
+        {name:"Куриный рулет",price:"140 ₽"},
+        {name:"Мясное лукошко с грибами",price:"160 ₽"},
+        {name:"Кур. филе в панировке",price:"120 ₽"},
+        {name:"Курица жареная",price:"750 ₽/КГ"},
+        {name:"Люля",price:"150 ₽"},
+        {name:"Мясо под сыром",price:"150 ₽"},
+        {name:"Перец",price:"550 ₽/кг"},
+        {name:"Рубл. кур. котлеты",price:"140 ₽"},
+        {name:"Рыба жареная",price:"150 ₽"},
+        {name:"Рыба под маринадом",price:"170 ₽"},
+        {name:"Рыба запеченая кефаль",price:"160 ₽"},
+        {name:"Шашлычки куриные",price:"900 ₽/кг"},
+        {name:"Тефтели домашние",price:"80 ₽"}
+    ],
+    salad: [
+        {name:"Винегрет",price:"60 ₽"},{name:"Витаминный",price:"50 ₽"},{name:"Гусарский",price:"130 ₽"},{name:"Закуска помидор с шапочкой",price:"50 ₽"},{name:"Крабовый",price:"80 ₽"},{name:"Мимоза",price:"120 ₽"},{name:"Моркова по-корейски",price:"70 ₽"},{name:"Мясной",price:"70 ₽"},{name:"Огурец,помидор",price:"50 ₽"},{name:"Оливье",price:"60 ₽"},{name:"Салат здоровье",price:"70 ₽"},{name:"Салат карибский",price:"120 ₽"},{name:"Свекла с сыром",price:"70 ₽"},{name:"Селедка под шубой",price:"120 ₽"},{name:"Цезарь",price:"120 ₽"}
+    ],
+    side: [
+        {name:"Гречка",price:"60 ₽"},
+        {name:"Картофельное пюре",price:"80 ₽"},
+        {name:"Макароны",price:"60 ₽"},
+        {name:"Плов",price:"150 ₽"},
+        {name:"Тушеная картошка",price:"150 ₽"},
+        {name:"Гречка по-купечески",price:"150 ₽"},
+        {name:"Рагу из овощей",price:"90 ₽"},
+        {name:"Рис",price:"60 ₽"},
+        {name:"Рис с овощями",price:"100 ₽"},
+        {name:"Каша молочная",price:"50 ₽"},
+        {name:"Фетучини курица,грибы",price:"200 ₽"},
+        {name:"Жульен",price:"170 ₽"},
+        {name:"Паста болоньезе",price:"180 ₽"},
+        {name:"Фунчоза с грибами",price:"210 ₽"},
+        {name:"Фунчоза с курицей",price:"200 ₽"},
+        {name:"Фунчоза с овощами",price:"190 ₽"}
+    ]
+};
+let currentMenu = JSON.parse(localStorage.getItem('menu_landscape_layout2_data')) || {
+    first:[{name:"Борщ",price:"60 ₽"},{name:"Солянка",price:"100 ₽"}],
+    second:[{name:"Гуляш",price:"80 ₽"},{name:"Котлета домашняя",price:"80 ₽"},{name:"Мясо под сыром",price:"140 ₽"}],
+    side:[{name:"Картофельное пюре",price:"60 ₽"},{name:"Гречка",price:"40 ₽"}],
+    salad:[{name:"Витаминный",price:"50 ₽"},{name:"Оливье",price:"60 ₽"}]
+};
+function init(){
+    ['first','second','salad','side'].forEach(cat=>{
+        const select=document.getElementById(`sel-${cat}`);
+        select.innerHTML='<option value="" disabled selected>Выберите...</option>';
+        DATABASE[cat].forEach((item,idx)=>{const opt=document.createElement('option');opt.value=idx;opt.textContent=`${item.name} — ${item.price}`;select.appendChild(opt);});
+    });
+    render();
+}
+function addFromSelect(cat){const select=document.getElementById(`sel-${cat}`);const idx=select.value;if(idx==="")return;currentMenu[cat].push({...DATABASE[cat][idx]});render();select.selectedIndex=0;}
+function deleteItem(cat,idx){currentMenu[cat].splice(idx,1);render();}
+function render(){
+    ['first','second','salad','side'].forEach(cat=>{const out=document.getElementById(`out-${cat}`);out.innerHTML='';currentMenu[cat].forEach(item=>{out.innerHTML+=`<div class="menu-item"><div class="item-row"><span class="item-name">${item.name}</span><span class="item-dots"></span><span class="item-price">${item.price}</span></div></div>`;});});
+    const manager=document.getElementById('manager-lists');manager.innerHTML='';const titles={first:'Первые блюда',second:'Вторые блюда',side:'Гарниры',salad:'Салаты'};
+    ['first','second','side','salad'].forEach(cat=>{if(currentMenu[cat].length>0){manager.innerHTML+=`<div class="manager-category">${titles[cat]}</div>`;currentMenu[cat].forEach((item,idx)=>{manager.innerHTML+=`<div class="manager-item"><span>${item.name} (${item.price})</span><button class="btn-del" onclick="deleteItem('${cat}', ${idx})">&times;</button></div>`;});}});
+    localStorage.setItem('menu_landscape_layout2_data',JSON.stringify(currentMenu));
+}
+function saveAsPNG(){
+    const btn=document.querySelector('.btn-save-png');if(!btn)return;btn.textContent='Сохранение...';btn.disabled=true;
+    const menu=document.getElementById('menu-el');if(!menu){console.error('Элемент #menu-el не найден');btn.textContent='Скачать меню (PNG)';btn.disabled=false;return;}
+    const originalStyle={width:menu.style.width,height:menu.style.height,overflow:menu.style.overflow,transform:menu.style.transform};
+    menu.style.width='1920px';menu.style.height='1080px';menu.style.overflow='hidden';
+    html2canvas(menu,{scale:2,backgroundColor:'#fdfcf9',useCORS:true,logging:false,letterRendering:true}).then(canvas=>{const link=document.createElement('a');link.download='menu-tv-16x9.png';link.href=canvas.toDataURL('image/png');document.body.appendChild(link);link.click();document.body.removeChild(link);Object.assign(menu.style,originalStyle);btn.textContent='Скачать меню (PNG)';btn.disabled=false;}).catch(err=>{console.error(err);Object.assign(menu.style,originalStyle);btn.textContent='Скачать меню (PNG)';btn.disabled=false;});
+}
+document.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>
